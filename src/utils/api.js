@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 // Create a reusable API instance
 const createAPI = (navigate) => {
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001",
     withCredentials: true,
     timeout: 120000, // 120 second timeout for large uploads
   });
