@@ -35,7 +35,7 @@ const WeddingServicesForm = () => {
   const [photoPreview, setPhotoPreview] = useState([])
 
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001",
     withCredentials: true,
   })
 

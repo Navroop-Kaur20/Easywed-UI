@@ -63,7 +63,7 @@ const WeddingCardsDetails = () => {
     }
     try {
       const payload = { card_template_id: id, date_time: date, quantity }
-      const response = await fetch("http://localhost:5000/dashboard/user/bookings", {
+      const response = await fetch("http://localhost:5001/dashboard/user/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
