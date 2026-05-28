@@ -311,8 +311,8 @@ const VendorDashboard = () => {
   }
 
   const { stats } = dashboardData
-  // Calculate total active services (pending + published)
-  const totalActive = stats.services.pending + stats.services.published
+  const approvedServices = stats.services.approved || stats.services.published || 0
+  const totalActive = stats.services.pending + approvedServices
 
   // Render dashboard summary cards
   const renderSummary = () => {
@@ -329,7 +329,7 @@ const VendorDashboard = () => {
             <h3 className="counter">{stats?.services?.total || 0}</h3>
             <p className="label">Services</p>
             <div className="stats-footer">
-              <i className="fas fa-check-circle me-1 text-success"></i> {stats?.services?.published || 0} Published
+              <i className="fas fa-check-circle me-1 text-success"></i> {stats?.services?.approved || stats?.services?.published || 0} Approved
               <span className="mx-2">|</span>
               <i className="fas fa-hourglass-half me-1 text-warning"></i> {stats?.services?.pending || 0} Pending
             </div>
@@ -465,13 +465,13 @@ const VendorDashboard = () => {
               <div
                 className="status-published"
                 style={{
-                  width: totalActive ? `${(stats.services.published / totalActive) * 100}%` : "0%",
+                  width: totalActive ? `${(approvedServices / totalActive) * 100}%` : "0%",
                 }}
               ></div>
             </div>
             <p className="status-text">
               <span className="status-pending-text">Pending: {stats.services.pending}</span> |
-              <span className="status-published-text">Published: {stats.services.published}</span>
+              <span className="status-published-text">Approved: {approvedServices}</span>
             </p>
           </div>
         </div>
@@ -506,7 +506,7 @@ const VendorDashboard = () => {
                         <td>
                           <span
                             className={`badge ${
-                              service.status === "published"
+                              service.status === "approved"
                                 ? "bg-success"
                                 : service.status === "pending"
                                   ? "bg-warning"

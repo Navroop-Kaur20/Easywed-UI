@@ -71,7 +71,7 @@ const AdminDashboard = () => {
           // Stats are already fetched
           break
         case "services":
-          const servicesRes = await api.get(`/dashboard/admin/services?page=${page}&limit=5`)
+          const servicesRes = await api.get(`/dashboard/admin/services?status=pending&page=${page}&limit=5`)
           newData = { ...newData, services: servicesRes.data.data }
           newPagination.services = servicesRes.data.pagination
           break
@@ -152,7 +152,7 @@ const AdminDashboard = () => {
     try {
       switch (deleteItem.type) {
         case 'service-reject':
-          await api.delete(`/dashboard/admin/services/${deleteItem.id}/reject`)
+          await api.patch(`/dashboard/admin/services/${deleteItem.id}/reject`)
           toast.success("Service rejected successfully")
           break
         case 'card-reject':
@@ -391,7 +391,7 @@ const AdminDashboard = () => {
       ...prev,
       [section]: { ...prev[section], page: newPage }
     }))
-    fetchDashboardData(section, newPage)
+    fetchDashboardData(section === "vendorRequests" ? "vendor-requests" : section, newPage)
   }
 
   // Pagination component
@@ -458,7 +458,7 @@ const AdminDashboard = () => {
               className={activeTab === "services" ? "active" : ""}
               onClick={() => handleTabChange("services")}
             >
-              <i className="fas fa-concierge-bell"></i> Services
+              <i className="fas fa-concierge-bell"></i> Service Requests
             </a>
           </li>
           <li>
@@ -516,7 +516,7 @@ const AdminDashboard = () => {
                 <h3 className="counter">{stats.totalServices || 0}</h3>
                 <p className="label">Total Services</p>
                 <div className="stats-footer">
-                  <i className="fas fa-check-circle me-1 text-success"></i> {stats.publishedServices || 0} Published
+                  <i className="fas fa-check-circle me-1 text-success"></i> {stats.approvedServices || stats.publishedServices || 0} Approved
                   <span className="mx-2">|</span>
                   <i className="fas fa-hourglass-half me-1 text-warning"></i> {stats.pendingServices || 0} Pending
                 </div>
@@ -561,13 +561,13 @@ const AdminDashboard = () => {
               <div
                 className="status-published"
                 style={{
-                  width: stats.totalServices ? `${(stats.publishedServices / stats.totalServices) * 100}%` : "0%",
+                  width: stats.totalServices ? `${((stats.approvedServices || stats.publishedServices || 0) / stats.totalServices) * 100}%` : "0%",
                 }}
               ></div>
             </div>
             <p className="status-text">
               <span className="status-pending-text">Pending: {stats.pendingServices || 0}</span> |
-              <span className="status-published-text">Published: {stats.publishedServices || 0}</span>
+              <span className="status-published-text">Approved: {stats.approvedServices || stats.publishedServices || 0}</span>
             </p>
           </div>
         </div>
@@ -575,7 +575,7 @@ const AdminDashboard = () => {
         {/* Services */}
         <div className={`content-section ${activeTab === "services" ? "active" : ""}`}>
           <div className="dashboard-header">
-            <h1>Services</h1>
+            <h1>Service Approval Requests</h1>
           </div>
           <div className="card">
             <div className="table-responsive">
@@ -625,7 +625,7 @@ const AdminDashboard = () => {
                                 <i className="fas fa-times"></i>
                               </Button>
                             </div>
-                          ) : service.status === "published" ? (
+                          ) : service.status === "approved" ? (
                             <div className="action-icons">
                               <Button
                                 variant="link"
@@ -662,7 +662,7 @@ const AdminDashboard = () => {
                   ) : (
                     <tr>
                       <td colSpan="5" className="text-center">
-                        No services found
+                        No pending service requests
                       </td>
                     </tr>
                   )}
@@ -1045,7 +1045,7 @@ const AdminDashboard = () => {
                         <i className="fas fa-times me-1"></i> Reject
                       </Button>
                     </div>
-                  ) : selectedService.status === "published" ? (
+                  ) : selectedService.status === "approved" ? (
                     <div className="d-flex justify-content-end">
                       <Button variant="warning" size="sm" className="btn-custom" onClick={() => {
                         revertServiceToPending(selectedService.service_id);

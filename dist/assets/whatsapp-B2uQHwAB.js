@@ -1,0 +1,1 @@
+const r=(s,n)=>{const e=s?s.replace(/\D/g,""):"";let t=e;e.startsWith("0")&&(t=`91${e.substring(1)}`),!t.startsWith("91")&&!t.startsWith("+91")&&(t=`91${t}`),t=t.replace("+","");const a=encodeURIComponent(n||"");return`https://wa.me/${t}?text=${a}`};export{r as g};

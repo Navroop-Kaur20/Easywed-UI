@@ -98,6 +98,14 @@ const VendorSignup = () => {
       toast.error("Brand icon is required", { toastId: "brandIconRequired" })
       return
     }
+    if (
+      formData.vendorRequest.whatsapp_number &&
+      formData.vendorRequest.whatsapp_number !== "+91" &&
+      !/^\+91[6-9][0-9]{9}$/.test(formData.vendorRequest.whatsapp_number.replace(/\s/g, ""))
+    ) {
+      toast.error("Please enter a valid WhatsApp number or leave it blank", { toastId: "whatsappNumber" })
+      return
+    }
 
     const success = await registerVendor({ ...formData, brand_icon: brandIcon })
     if (success) setShowOtpModal(true)

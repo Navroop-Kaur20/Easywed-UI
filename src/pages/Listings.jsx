@@ -75,6 +75,7 @@ const Listings = () => {
   useEffect(() => {
     const loadServices = async () => {
       setLoading(true);
+      setError(null);
       try {
         const params = {
           page: currentPage,
@@ -234,7 +235,7 @@ const Listings = () => {
             ) : error ? (
               <div className="deals-error-message">{error}</div>
             ) : services.length === 0 ? (
-              <div className="deals-no-results">No services found. Try adjusting your filters or search.</div>
+              <div className="deals-no-results">No services available right now.</div>
             ) : (
               <div className="deals-service-cards">
                 {services.map((service) => (

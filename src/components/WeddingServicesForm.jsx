@@ -10,7 +10,7 @@ import "../styles/card-form.css"
 import axios from "axios"
 
 const WeddingServicesForm = () => {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
   const { serviceId } = useParams()
   const isEditMode = !!serviceId
@@ -478,6 +478,12 @@ const WeddingServicesForm = () => {
       return false
     }
 
+    const validPackages = formData.pricing_packages.filter((pkg) => pkg.name && Number(pkg.price) > 0)
+    if (validPackages.length === 0) {
+      toast.error("Please add at least one pricing package")
+      return false
+    }
+
     const fields = categoryFields[formData.category] || []
     for (const field of fields) {
       if (field.required) {
@@ -494,6 +500,7 @@ const WeddingServicesForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log("SERVICE FORM DATA:", formData)
 
     if (!validateForm()) {
       return
@@ -544,27 +551,37 @@ const WeddingServicesForm = () => {
         }
       }
 
+      console.log(
+        "Service FormData payload:",
+        Array.from(serviceFormData.entries()).map(([key, value]) => [
+          key,
+          value instanceof File ? { name: value.name, size: value.size, type: value.type } : value,
+        ])
+      )
+
       let response
       if (isEditMode) {
         response = await api.put(`/vendor/dashboard/services/${serviceId}`, serviceFormData, {
           headers: { "Content-Type": "multipart/form-data" }
         })
-        toast.success("Service updated successfully and is awaiting approval.")
+        toast.success("Service updated successfully and is pending admin approval.")
       } else {
         response = await api.post("/vendor/dashboard/services", serviceFormData, {
           headers: { "Content-Type": "multipart/form-data" }
         })
-        toast.success("Service created successfully and is awaiting approval.")
+        toast.success("Service created successfully and is pending admin approval.")
       }
+      console.log("SERVICE API RESPONSE:", response.data)
 
       setTimeout(() => {
         navigate("/vendor/dashboard")
       }, 2000)
     } catch (error) {
-      console.error("Service submission error:", error)
+      console.log("SERVICE ERROR:", error.response?.data || error.message)
+      console.error("Service submission error:", error.response?.data || error)
       
       if (error.response?.status === 500) {
-        toast.error("Server error. The service could not be saved. Please try again later or contact support.")
+        toast.error(error.response.data?.error || error.response.data?.message || "Server error. The service could not be saved.")
       } else if (error.response?.status === 413) {
         toast.error("The photos you uploaded are too large. Please resize them and try again.")
       } else if (error.response?.status === 400) {

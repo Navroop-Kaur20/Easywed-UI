@@ -34,31 +34,16 @@ export const AuthProvider = ({ children }) => {
       try {
         let authChecked = false;
         
-        // First try the vendor endpoint since we're focusing on vendor implementation
         try {
-          const vendorResponse = await api.get("/vendor/check-auth")
-          if (vendorResponse.data.user) {
-            setUser(vendorResponse.data.user)
+          const userResponse = await api.get("/users/check-auth")
+          if (userResponse.data.user) {
+            setUser(userResponse.data.user)
             authChecked = true;
           }
-        } catch (vendorError) {
-          // Vendor check failed, continue to other checks
+        } catch (userError) {
+          // User check failed, continue
         }
         
-        // Then try user endpoint if vendor check failed
-        if (!authChecked) {
-          try {
-            const userResponse = await api.get("/users/check-auth")
-            if (userResponse.data.user) {
-              setUser(userResponse.data.user)
-              authChecked = true;
-            }
-          } catch (userError) {
-            // User check failed, continue
-          }
-        }
-        
-        // Finally try admin endpoint
         if (!authChecked) {
           try {
             const adminResponse = await api.get("/admins/check-auth")
@@ -226,7 +211,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true)
     try {
       const res = await api.post("/vendor/login", { identifier, password })
-      setUser({ ...res.data.user, role: "vendor" })
+      setUser({ ...(res.data.vendor || res.data.user), role: "vendor" })
       navigate("/vendor/dashboard", { replace: true })
       return true
     } catch (err) {
@@ -312,7 +297,15 @@ export const AuthProvider = ({ children }) => {
       formData.append("password", password)
       formData.append("brand_icon", brand_icon)
       Object.keys(vendorRequest).forEach((key) => {
-        formData.append(`vendorRequest[${key}]`, vendorRequest[key])
+        const value = vendorRequest[key]
+        const normalizedValue = key === "whatsapp_number" || key === "phone_whatsapp"
+          ? normalizeIndianPhone(value)
+          : value
+
+        if ((key === "whatsapp_number" || key === "phone_whatsapp") && normalizedValue === "+91") {
+          return
+        }
+        formData.append(`vendorRequest[${key}]`, normalizedValue)
       })
       if (otp) formData.append("otp", otp)
 
