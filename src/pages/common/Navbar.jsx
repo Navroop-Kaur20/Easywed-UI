@@ -112,6 +112,7 @@ const Navbar = () => {
                       <li><Link className="dropdown-item" to="/signin">Sign In</Link></li>
                       <li><Link className="dropdown-item" to="/signup">Sign Up</Link></li>
                       <li><Link className="dropdown-item" to="/vendor/login">Vendor Login</Link></li>
+                      <li><Link className="dropdown-item" to="/admin/login">Admin Login</Link></li>
                     </>
                   )}
                 </ul>
